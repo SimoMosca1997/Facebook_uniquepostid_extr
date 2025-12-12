@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facebook Post ID Extractor</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    textarea { width: 100%; height: 100px; margin-bottom: 10px; padding: 10px; font-size: 16px; border-radius: 4px; border: 1px solid #ddd; }
+    button { background-color: #4267B2; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background-color: #365899; }
+    .output ul { list-style: none; padding: 0; }
+    .output li { background: #f1f1f1; margin: 5px 0; padding: 10px; border-radius: 4px; }
+    .footer { position: fixed; bottom: 5px; width: 100%; text-align: center; font-size: 12px; color: #888; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Facebook Post ID Extractor</h1>
+    <p>Paste one or more Facebook links (one per line):</p>
+    <textarea id="fbInputLinks" placeholder="https://www.facebook.com/..."></textarea>
+    <button onclick="extractFacebookIds()">Find Facebook IDs</button>
+    <div class="output">
+        <h2>Results:</h2>
+        <ul id="fbResultList"></ul>
+    </div>
+</div>
+
+<div class="footer">© 2025 Developed by Simone Moschetti</div>
+
+<script>
+async function extractFacebookIds() {
+    const input = document.getElementById('fbInputLinks').value;
+    const links = input.split('\n').map(l => l.trim());
+    const resultList = document.getElementById('fbResultList');
+    resultList.innerHTML = '';
+
+    for (const link of links) {
+        if (!link) continue;
+        try {
+            const response = await fetch('/extract-facebook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: link })
+            });
+            const data = await response.json();
+            const li = document.createElement('li');
+            li.textContent = response.ok ? `FBID: ${data.fbid || 'N/A'} | POST_ID: ${data.post_id || 'N/A'}` : `Error: ${data.error}`;
+            resultList.appendChild(li);
+        } catch (err) {
+            const li = document.createElement('li');
+            li.textContent = `Error fetching: ${link}`;
+            resultList.appendChild(li);
+        }
+    }
+}
+</script>
+</body>
+</html>
